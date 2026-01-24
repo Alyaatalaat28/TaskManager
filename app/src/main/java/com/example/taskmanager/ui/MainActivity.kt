@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.textfield.TextInputEditText
@@ -21,14 +22,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var taskRecyclerView: RecyclerView
     private lateinit var emptyStateText: TextView
 
-    // Data
-    private val tasks = mutableListOf<Task>()
+    // ViewModel
+    private lateinit var taskViewModel: TaskViewModel
+
+    // Adapter
     private lateinit var taskAdapter: TaskAdapter
-    private var nextId = 1
+    private val tasks = mutableListOf<Task>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        // Initialize ViewModel
+        taskViewModel = ViewModelProvider(this)[TaskViewModel::class.java]
 
         // Initialize views
         initViews()
@@ -38,6 +44,9 @@ class MainActivity : AppCompatActivity() {
 
         // Setup listeners
         setupListeners()
+
+        // Observe tasks from database
+        observeTasks()
     }
 
     private fun initViews() {
@@ -76,6 +85,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun observeTasks() {
+        taskViewModel.allTasks.observe(this) { taskList ->
+            // Update adapter with new data from database
+            tasks.clear()
+            tasks.addAll(taskList)
+            taskAdapter.notifyDataSetChanged()
+
+            // Update empty state
+            updateEmptyState()
+        }
+    }
+
     private fun addTask() {
         val taskTitle = taskInput.text.toString().trim()
 
@@ -85,32 +106,33 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // Create and add task
+        // Create and insert task into database
         val newTask = Task(
-            id = nextId++,
             title = taskTitle,
             isCompleted = false
         )
 
-        taskAdapter.addTask(newTask)
+        taskViewModel.insert(newTask)
+
         taskInput.text?.clear()
         taskInput.clearFocus()
-
-        // Update UI visibility
-        updateEmptyState()
 
         // Show confirmation
         Toast.makeText(this, "Task added!", Toast.LENGTH_SHORT).show()
     }
 
     private fun handleTaskToggle(task: Task) {
+        // Update task in database
+        taskViewModel.update(task)
+
         val status = if (task.isCompleted) "completed" else "uncompleted"
         Toast.makeText(this, "Task marked as $status", Toast.LENGTH_SHORT).show()
     }
 
     private fun handleTaskDelete(task: Task) {
-        taskAdapter.removeTask(task)
-        updateEmptyState()
+        // Delete from database
+        taskViewModel.delete(task)
+
         Toast.makeText(this, "Task deleted", Toast.LENGTH_SHORT).show()
     }
 
