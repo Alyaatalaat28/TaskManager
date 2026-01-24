@@ -42,7 +42,8 @@ class TaskAdapter(
         if (task.isCompleted) {
             holder.taskTitle.paintFlags = holder.taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
         } else {
-            holder.taskTitle.paintFlags = holder.taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+            holder.taskTitle.paintFlags =
+                holder.taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
         }
 
         // Checkbox listener
@@ -52,9 +53,11 @@ class TaskAdapter(
 
             // Update strikethrough
             if (isChecked) {
-                holder.taskTitle.paintFlags = holder.taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
+                holder.taskTitle.paintFlags =
+                    holder.taskTitle.paintFlags or Paint.STRIKE_THRU_TEXT_FLAG
             } else {
-                holder.taskTitle.paintFlags = holder.taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                holder.taskTitle.paintFlags =
+                    holder.taskTitle.paintFlags and Paint.STRIKE_THRU_TEXT_FLAG.inv()
             }
         }
 
@@ -66,18 +69,5 @@ class TaskAdapter(
 
     override fun getItemCount(): Int = tasks.size
 
-    // Helper method to add task
-    fun addTask(task: Task) {
-        tasks.add(task)
-        notifyItemInserted(tasks.size - 1)
-    }
 
-    // Helper method to remove task
-    fun removeTask(task: Task) {
-        val position = tasks.indexOf(task)
-        if (position != -1) {
-            tasks.removeAt(position)
-            notifyItemRemoved(position)
-        }
-    }
 }
